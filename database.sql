@@ -16,7 +16,7 @@ CREATE TABLE settings (
 
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL,
     description VARCHAR(255),
     identifiant VARCHAR(255) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -29,10 +29,14 @@ CREATE TABLE users (
 CREATE TABLE pokemon (
     id INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    sprite VARCHAR(255),
+    shiny VARCHAR(255),
     type1 VARCHAR(50),
     type2 VARCHAR(50),
     height FLOAT,
     weight FLOAT,
+    rarity VARCHAR(50),
+    sumStats INT,
     generation INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

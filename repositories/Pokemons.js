@@ -15,21 +15,29 @@ export default class Pokemons {
             (
                 id,
                 name,
+                sprite,
+                shiny,
                 type1,
                 type2,
                 height,
                 weight,
+                rarity,
+                sumStats,
                 generation
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 data.id,
                 data.name,
+                data.sprite,
+                data.shiny,
                 data.type1,
                 data.type2,
                 data.height,
                 data.weight,
+                data.rarity,
+                data.sumStats,
                 data.generation
             ]
         );
