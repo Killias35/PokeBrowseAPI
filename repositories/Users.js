@@ -40,7 +40,7 @@ export default class Users {
 
         const result = await this.query(
             `
-            SELECT id, username, description, identifiant, created_at
+            SELECT id, username, description, created_at
             FROM users
             WHERE username = ?
             LIMIT 1
