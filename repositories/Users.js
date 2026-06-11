@@ -40,7 +40,7 @@ export default class Users {
 
         const result = await this.query(
             `
-            SELECT id, username, description, created_at
+            SELECT id, username, description, identifiant, created_at
             FROM users
             WHERE username = ?
             LIMIT 1
@@ -66,15 +66,15 @@ export default class Users {
         return result[0] || null;
     }
 
-    async update(id, username, description) {
+    async update(identifiant, username, description) {
 
         const result = await this.query(
             `
             UPDATE users
             SET username = ?, description = ?
-            WHERE id = ?
+            WHERE identifiant = ?
             `,
-            [username, description, id]
+            [username, description, identifiant]
         );
 
         return result.affectedRows > 0;

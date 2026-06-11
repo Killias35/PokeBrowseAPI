@@ -136,19 +136,18 @@ router.get("/search/:username", async (req, res) => {
 
 });
 
-router.patch("/:id", async (req, res) => {
+router.patch("/:identifiant", async (req, res) => {
 
     try {
 
-        const userId = req.params.id;
+        const identifiant = req.params.identifiant;
 
         const {
             username,
-            description,
-            identifiant
+            description
         } = req.body;
 
-        if (!username && !description && !identifiant) {
+        if (!username && !description) {
 
             return res.status(400).json({
                 success: false,
@@ -157,8 +156,7 @@ router.patch("/:id", async (req, res) => {
 
         }
 
-        const existing =
-            await usersRepo.getById(userId);
+        const existing = await usersRepo.getByIdentifiant(identifiant);
 
         if (!existing) {
 
@@ -169,11 +167,7 @@ router.patch("/:id", async (req, res) => {
 
         }
 
-        const updated = await usersRepo.update(userId, {
-            username,
-            description,
-            identifiant
-        });
+        const updated = await usersRepo.update(identifiant, username, description);
 
         res.json({
             success: true,
