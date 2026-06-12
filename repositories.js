@@ -19,5 +19,3 @@ export const pokemonsRepo = new Pokemons(connection);
 export const userPokemonsRepo = new UserPokemons(connection);
 export const leaderboardsRepo = new Leaderboards(connection);
 export const settingsRepo = new Settings(connection);
-
-console.log(await (hashPassword("test")));
