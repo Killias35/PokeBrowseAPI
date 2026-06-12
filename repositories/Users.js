@@ -1,4 +1,9 @@
 import { promisify } from "util";
+import bcrypt from "bcrypt";
+
+export async function checkPassword(password, hash) {
+    return await bcrypt.compare(password, hash);
+}
 
 export default class Users {
 
@@ -51,30 +56,31 @@ export default class Users {
         return result[0] || null;
     }
 
-    async getByIdentifiant(identifiant) {
-
+    async getForIdentifiant(username) {
         const result = await this.query(
             `
-            SELECT *
+            SELECT id, identifiant
             FROM users
-            WHERE identifiant = ?
+            WHERE username = ?
             LIMIT 1
             `,
-            [identifiant]
+            [username]
         );
 
-        return result[0] || null;
+        return (
+            result[0] || null
+        )
     }
 
-    async update(identifiant, image, username, description) {
+    async update(id, image, username, description) {
 
         const result = await this.query(
             `
             UPDATE users
             SET image = ?, username = ?, description = ?
-            WHERE identifiant = ?
+            WHERE id = ?
             `,
-            [image, username, description, identifiant]
+            [image, username, description, id]
         );
 
         return result.affectedRows > 0;
@@ -103,5 +109,13 @@ export default class Users {
         );
 
         return result;
+    }
+
+    async isConnected(username, identifiant) {
+        const user = await this.getForIdentifiant(username);
+        if (!user) {
+            return false;
+        }
+        return await checkPassword(identifiant, user.identifiant);
     }
 }

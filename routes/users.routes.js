@@ -1,5 +1,5 @@
 import express from "express";
-import { usersRepo } from "../repositories.js";
+import { usersRepo, hashPassword } from "../repositories.js";
 
 const router = express.Router();
 
@@ -35,12 +35,13 @@ POST /users/register
 router.post("/register", async (req, res) => {
 
     try {
-        const {
+        let {
             image,
             username,
             description,
             identifiant
         } = req.body;
+        identifiant = await hashPassword(identifiant);
 
         if (!username || !description || !identifiant || !image) {
 
@@ -51,16 +52,13 @@ router.post("/register", async (req, res) => {
 
         }
 
-        const existing =
-            await usersRepo.getByIdentifiant(identifiant);
-
-        if (existing) {
+        let existUsername = await usersRepo.getByUsername(username);
+        if (existUsername) {
 
             return res.status(409).json({
                 success: false,
-                message: "User already exists"
+                message: "Username déjà utilisé"
             });
-
         }
 
         const id =
@@ -161,39 +159,39 @@ router.get("/search/:username", async (req, res) => {
 
 });
 
-router.patch("/:identifiant", async (req, res) => {
+router.patch("/", async (req, res) => {
 
     try {
 
-        const identifiant = req.params.identifiant;
-
-        const {
+        let {
             image,
             username,
-            description
+            description,
+            identifiant
         } = req.body;
-
+        
         if (!username && !description && !image) {
 
             return res.status(400).json({
                 success: false,
-                message: "Nothing to update"
+                message: "Rien à mettre à jour"
             });
 
         }
 
-        const existing = await usersRepo.getByIdentifiant(identifiant);
 
-        if (!existing) {
+        const connected = await usersRepo.isConnected(username, identifiant);
+        if (!connected) {
 
-            return res.status(404).json({
+            return res.status(401).json({
                 success: false,
-                message: "User not found"
+                message: "Mauvais identifiant ou Username"
             });
-
         }
 
-        const updated = await usersRepo.update(identifiant, image, username, description);
+        const user = await usersRepo.getByUsername(username);
+
+        const updated = await usersRepo.update(user.id, image, username, description);
 
         res.json({
             success: true,
@@ -217,30 +215,29 @@ router.post("/login", async (req, res) => {
 
     try {
 
-        const {
+        let {
+            username,
             identifiant
         } = req.body;
-
-        if (!identifiant) {
+        if (!identifiant || !username) {
 
             return res.status(400).json({
                 success: false,
-                message: "Missing identifiant"
+                message: "Missing username or identifiant"
             });
 
         }
 
-        const user = await usersRepo.getByIdentifiant(identifiant);
+        const connected = await usersRepo.isConnected(username, identifiant);
+        if (!connected) {
 
-        if (!user) {
-
-            return res.status(404).json({
+            return res.status(401).json({
                 success: false,
-                message: "User not found"
+                message: "Mauvais identifiant ou Username"
             });
-
         }
 
+        const user = await usersRepo.getByUsername(username);
         res.json({
             success: true,
             user

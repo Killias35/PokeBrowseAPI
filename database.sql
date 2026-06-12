@@ -17,9 +17,9 @@ CREATE TABLE settings (
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     image TEXT,
-    username VARCHAR(50) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
-    identifiant VARCHAR(255) NOT NULL UNIQUE,
+    identifiant VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
