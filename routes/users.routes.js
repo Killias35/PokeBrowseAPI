@@ -11,24 +11,23 @@ router.post("/register", async (req, res) => {
 
     try {
         const {
+            image,
             username,
             description,
             identifiant
         } = req.body;
 
-        if (!username || !description || !identifiant) {
+        if (!username || !description || !identifiant || !image) {
 
             return res.status(400).json({
                 success: false,
-                message: "Missing username or description or identifiant"
+                message: "Missing username or description or identifiant or image"
             });
 
         }
 
         const existing =
-            await usersRepo.getByIdentifiant(
-                identifiant
-            );
+            await usersRepo.getByIdentifiant(identifiant);
 
         if (existing) {
 
@@ -41,6 +40,7 @@ router.post("/register", async (req, res) => {
 
         const id =
             await usersRepo.create(
+                image,
                 username,
                 description,
                 identifiant
@@ -143,11 +143,12 @@ router.patch("/:identifiant", async (req, res) => {
         const identifiant = req.params.identifiant;
 
         const {
+            image,
             username,
             description
         } = req.body;
 
-        if (!username && !description) {
+        if (!username && !description && !image) {
 
             return res.status(400).json({
                 success: false,
@@ -167,7 +168,7 @@ router.patch("/:identifiant", async (req, res) => {
 
         }
 
-        const updated = await usersRepo.update(identifiant, username, description);
+        const updated = await usersRepo.update(identifiant, image, username, description);
 
         res.json({
             success: true,

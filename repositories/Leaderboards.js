@@ -14,6 +14,7 @@ export default class Leaderboards {
             SELECT
                 u.id,
                 u.username,
+                u.image,
                 COUNT(DISTINCT up.pokemon_id) as score
             FROM users u
             INNER JOIN user_pokemon up
@@ -34,6 +35,7 @@ export default class Leaderboards {
             SELECT
                 u.id,
                 u.username,
+                u.image,
                 COUNT(*) as score
             FROM users u
             INNER JOIN user_pokemon up
@@ -54,6 +56,7 @@ export default class Leaderboards {
             SELECT
                 u.id,
                 u.username,
+                u.image,
                 COUNT(*) as score
             FROM users u
             INNER JOIN user_pokemon up

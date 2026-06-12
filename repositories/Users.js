@@ -7,15 +7,15 @@ export default class Users {
         this.query = promisify(connection.query).bind(connection);
     }
 
-    async create(username, description, identifiant) {
+    async create(image, username, description, identifiant) {
 
         const result = await this.query(
             `
             INSERT INTO users
-            (username, description, identifiant)
-            VALUES (?, ?, ?)
+            (image, username, description, identifiant)
+            VALUES (?, ?, ?, ?)
             `,
-            [username, description, identifiant]
+            [image, username, description, identifiant]
         );
 
         return result.insertId;
@@ -25,7 +25,7 @@ export default class Users {
 
         const result = await this.query(
             `
-            SELECT id, username, description, created_at
+            SELECT id, image, username, description, created_at
             FROM users
             WHERE id = ?
             LIMIT 1
@@ -40,7 +40,7 @@ export default class Users {
 
         const result = await this.query(
             `
-            SELECT id, username, description, created_at
+            SELECT id, image, username, description, created_at
             FROM users
             WHERE username = ?
             LIMIT 1
@@ -66,15 +66,15 @@ export default class Users {
         return result[0] || null;
     }
 
-    async update(identifiant, username, description) {
+    async update(identifiant, image, username, description) {
 
         const result = await this.query(
             `
             UPDATE users
-            SET username = ?, description = ?
+            SET image = ?, username = ?, description = ?
             WHERE identifiant = ?
             `,
-            [username, description, identifiant]
+            [image, username, description, identifiant]
         );
 
         return result.affectedRows > 0;
