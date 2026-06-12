@@ -49,4 +49,18 @@ export default class UserPokemons {
 
     }
 
+    async freePokemons(userId) {
+
+        const result = await this.query(
+            `
+            DELETE FROM user_pokemon
+            WHERE user_id = ?
+            `,
+            [userId]
+        );
+
+        return result.affectedRows > 0;
+
+    }
+
 }

@@ -126,4 +126,31 @@ router.get("/:id", async (req, res) => {
 
 });
 
+
+router.delete("/free/:identifiant", async (req, res) => {
+
+    try {
+
+        const identifiant = req.params.identifiant;
+        const user = await usersRepo.getByIdentifiant(identifiant);
+        const ret = await userPokemonsRepo.freePokemons(user.id);
+
+        res.json({
+            success: true,
+            freed: ret
+        });
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+
+});
+
 export default router;
