@@ -60,4 +60,16 @@ export default class Pokemons {
         return result[0] || null;
     }
 
+    async getAll() {
+
+        const result = await this.query(
+            `
+            SELECT *
+            FROM pokemon
+            `
+        );
+
+        return result;
+    }
+
 }

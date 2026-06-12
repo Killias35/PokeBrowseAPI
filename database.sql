@@ -89,7 +89,7 @@ ON user_pokemon (user_id, is_shiny);
 -- =========================
 
 INSERT INTO settings (nb_pokemons)
-VALUES (0);
+VALUES (151);
 
 -- =========================
 -- VIEW BONUS (OPTIONNEL MAIS TRÈS UTILE)

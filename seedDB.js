@@ -19,20 +19,24 @@ export async function getPokemon(id) {
     )?.name || pokemon.name;
     
     let stats = {}
-    let sumSats = 0;
+    let sumStats = 0;
     let rarity = 'commun';
     for (const stat of pokemon.stats) {
         stats[stat.stat.name] = stat.base_stat;
-        sumSats += stat.base_stat;
+        sumStats += stat.base_stat;
     }
-    if (sumSats >= 580) rarity = 'legendary';
-    else if (sumSats >= 500) rarity = 'epic';
-    else if (sumSats >= 400) rarity = 'rare';
+    if (sumStats >= 580) rarity = 'legendary';
+    else if (sumStats >= 500) rarity = 'epic';
+    else if (sumStats >= 400) rarity = 'rare';
     
     const generationId = species.generation.url
     .split('/')
     .filter(Boolean)
     .pop();
+
+    pokemon.rarity = rarity;
+    pokemon.sumStats = sumStats;
+    pokemon.generation = generationId;
 
     return {
         id: pokemon.id,
@@ -43,9 +47,9 @@ export async function getPokemon(id) {
         weight: pokemon.weight,
         type1: pokemon.types[0].type.name,
         type2: pokemon.types[1]?.type.name,
-        rarity,
-        sumSats,
-        generation: generationId
+        rarity: pokemon.rarity,
+        sumStats: pokemon.sumStats,
+        generation: pokemon.generation
     };
 }
 

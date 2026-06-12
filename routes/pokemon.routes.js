@@ -9,6 +9,32 @@ from "../repositories.js";
 
 const router = express.Router();
 
+
+router.get("/", async (req, res) => {
+
+    try {
+
+        const data =
+            await pokemonsRepo.getAll();
+
+        res.json({
+            success: true,
+            pokemons: data
+        });
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+
+});
+
 /*
 POST /pokemon/capture
 */
