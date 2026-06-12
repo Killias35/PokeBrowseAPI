@@ -17,9 +17,9 @@ export default class Leaderboards {
                 u.image,
                 COUNT(DISTINCT up.pokemon_id) as score
             FROM users u
-            INNER JOIN user_pokemon up
+            LEFT JOIN user_pokemon up
                 ON up.user_id = u.id
-            GROUP BY u.id
+            GROUP BY u.id, u.username, u.image
             ORDER BY score DESC
             LIMIT ?
             `,
@@ -36,11 +36,11 @@ export default class Leaderboards {
                 u.id,
                 u.username,
                 u.image,
-                COUNT(*) as score
+                COUNT(up.pokemon_id) as score
             FROM users u
-            INNER JOIN user_pokemon up
+            LEFT JOIN user_pokemon up
                 ON up.user_id = u.id
-            GROUP BY u.id
+            GROUP BY u.id, u.username, u.image
             ORDER BY score DESC
             LIMIT ?
             `,
@@ -57,18 +57,17 @@ export default class Leaderboards {
                 u.id,
                 u.username,
                 u.image,
-                COUNT(*) as score
+                COUNT(up.pokemon_id) as score
             FROM users u
-            INNER JOIN user_pokemon up
+            LEFT JOIN user_pokemon up
                 ON up.user_id = u.id
-            WHERE up.is_shiny = 1
-            GROUP BY u.id
+                AND up.is_shiny = 1
+            GROUP BY u.id, u.username, u.image
             ORDER BY score DESC
             LIMIT ?
             `,
             [limit]
         );
-
     }
 
 }

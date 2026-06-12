@@ -3,6 +3,31 @@ import { usersRepo } from "../repositories.js";
 
 const router = express.Router();
 
+router.get("/", async (req, res) => {
+
+    try {
+
+        const data =
+            await usersRepo.getAll();
+
+        res.json({
+            success: true,
+            users: data
+        });
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+
+});
+
 /*
 POST /users/register
 */

@@ -93,4 +93,15 @@ export default class Users {
         return result.affectedRows > 0;
     }
 
+    async getAll(){
+
+        const result = await this.query(
+            `
+            SELECT id, image, username, description
+            FROM users
+            `
+        );
+
+        return result;
+    }
 }
