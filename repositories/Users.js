@@ -97,7 +97,7 @@ export default class Users {
 
         const result = await this.query(
             `
-            SELECT id, image, username, description
+            SELECT id, image, username, description, created_at
             FROM users
             `
         );
