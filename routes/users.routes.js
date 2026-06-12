@@ -188,4 +188,50 @@ router.patch("/:identifiant", async (req, res) => {
 
 });
 
+router.post("/login", async (req, res) => {
+
+    try {
+
+        const {
+            identifiant
+        } = req.body;
+
+        if (!identifiant) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Missing identifiant"
+            });
+
+        }
+
+        const user = await usersRepo.getByIdentifiant(identifiant);
+
+        if (!user) {
+
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+
+        }
+
+        res.json({
+            success: true,
+            user
+        });
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+
+});
+
 export default router;
