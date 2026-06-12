@@ -110,29 +110,25 @@ router.post("/capture", async (req, res) => {
 
 });
 
-router.get("/capture", async (req, res) => {
-
+router.get("/capture/:username", async (req, res) => {
     try {
-        const {
-            username,
-            identifiant
-        } = req.body;
-
-        if (!username || !identifiant) {
+        const username = req.params.username;
+        if (!username) {
 
             return res.status(400).json({
                 success: false,
                 message: "Missing fields"
             });
         }
-        if (!await usersRepo.isConnected(username, identifiant)) {
 
-            return res.status(401).json({
+        const user = await usersRepo.getByUsername(username);
+        if (!user) {
+
+            return res.status(404).json({
                 success: false,
-                message: "Mauvais identifiant ou Username"
+                message: "Unknown user"
             });
         }
-        const user = await usersRepo.getByUsername(username);
         const captures = await userPokemonsRepo.getUserCaptures(user.id);
 
         res.json({
@@ -146,7 +142,8 @@ router.get("/capture", async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            success: false
+            success: false,
+            message: error
         });
 
     }
@@ -201,7 +198,7 @@ router.delete("/free/", async (req, res) => {
             identifiant
         } = req.body;
 
-        if (!username || !identifiant) {
+        if (!username && !identifiant) {
 
             return res.status(400).json({
                 success: false,
