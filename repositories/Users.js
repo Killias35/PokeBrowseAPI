@@ -5,6 +5,17 @@ export async function checkPassword(password, hash) {
     return await bcrypt.compare(password, hash);
 }
 
+const BASE_NB = 25;
+function nbValide(value) {
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return false;
+  }
+
+  const n = Number(value);
+
+  return Number.isFinite(n) && n >= 0 && n <= 2000;
+}
+
 export default class Users {
 
     constructor(connection) {
@@ -13,7 +24,7 @@ export default class Users {
     }
 
     async create(image, username, description, identifiant) {
-
+        if(!nbValide(image) || image === null) image = BASE_NB;
         const result = await this.query(
             `
             INSERT INTO users
@@ -73,7 +84,7 @@ export default class Users {
     }
 
     async update(id, image, username, description) {
-
+        if(!nbValide(image) || image === null) image = BASE_NB;
         const result = await this.query(
             `
             UPDATE users
