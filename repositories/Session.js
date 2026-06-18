@@ -34,6 +34,17 @@ export default class Session {
         return token;
     }
 
+    async refreshExpiresAt(user_id) {
+        const result = await this.query(
+            `
+            UPDATE Session
+            SET expires_at = DATE_ADD(NOW(), INTERVAL 7 DAY)
+            WHERE user_id = ?
+            `,
+            [user_id]
+        )
+    }
+
     async getToken(user_id) {
         const result = await this.query(
             `
@@ -59,7 +70,9 @@ export default class Session {
             [token, user_id]
         );
 
-        return result[0] || null;
+        const chekToken = result[0] || null;
+        if(chekToken) await this.refreshExpiresAt(user_id);
+        return chekToken;
     }
 
 }
