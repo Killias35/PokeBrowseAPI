@@ -1,5 +1,5 @@
 import express from "express";
-import { usersRepo, hashPassword } from "../repositories.js";
+import { usersRepo, sessionRepo, hashPassword } from "../repositories.js";
 
 const router = express.Router();
 
@@ -61,17 +61,13 @@ router.post("/register", async (req, res) => {
             });
         }
 
-        const id =
-            await usersRepo.create(
-                image,
-                username,
-                description,
-                identifiant
-            );
+        const user_id = await usersRepo.create(image, username, description, identifiant);
+        const token = await sessionRepo.create(user_id);
 
         res.json({
             success: true,
-            id
+            user_id,
+            token
         });
 
     }
@@ -176,11 +172,18 @@ router.patch("/", async (req, res) => {
                 success: false,
                 message: "Rien à mettre à jour"
             });
-
         }
 
+        const user = await usersRepo.getByUsername(username);
+        if (!user) {
 
-        const connected = await usersRepo.isConnected(username, identifiant);
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur inconnu"
+            });
+        }
+
+        const connected = await sessionRepo.chekToken(user.id, identifiant);
         if (!connected) {
 
             return res.status(401).json({
@@ -188,9 +191,6 @@ router.patch("/", async (req, res) => {
                 message: "Mauvais identifiant ou Username"
             });
         }
-
-        const user = await usersRepo.getByUsername(username);
-
         const updated = await usersRepo.update(user.id, image, username, description);
 
         res.json({
@@ -238,9 +238,11 @@ router.post("/login", async (req, res) => {
         }
 
         const user = await usersRepo.getByUsername(username);
+        const token = await sessionRepo.refreshToken(user.id);
         res.json({
             success: true,
-            user
+            user,
+            token
         });
 
     }

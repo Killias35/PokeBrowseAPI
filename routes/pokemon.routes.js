@@ -3,7 +3,8 @@ import express from "express";
 import {
     pokemonsRepo,
     userPokemonsRepo,
-    usersRepo
+    usersRepo,
+    sessionRepo
 }
 from "../repositories.js";
 
@@ -60,7 +61,16 @@ router.post("/capture", async (req, res) => {
 
         }
 
-        const connected = await usersRepo.isConnected(username, identifiant);
+        const user = await usersRepo.getByUsername(username);
+        if (!user) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur inconnu"
+            });
+        }
+
+        const connected = await sessionRepo.chekToken(user.id, identifiant);
         if (!connected) {
 
             return res.status(401).json({
@@ -68,7 +78,6 @@ router.post("/capture", async (req, res) => {
                 message: "Mauvais identifiant ou Username"
             });
         }
-        const user = await usersRepo.getByUsername(username);
 
         const pokemon =
             await pokemonsRepo.getById(
@@ -205,7 +214,18 @@ router.delete("/free/", async (req, res) => {
                 message: "Missing fields"
             });
         }
-        if (!await usersRepo.isConnected(username, identifiant)) {
+
+        const user = await usersRepo.getByUsername(username);
+        if (!user) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur inconnu"
+            });
+        }
+
+        const connected = await sessionRepo.chekToken(user.id, identifiant);
+        if (!connected) {
 
             return res.status(401).json({
                 success: false,
@@ -213,7 +233,6 @@ router.delete("/free/", async (req, res) => {
             });
         }
 
-        const user = await usersRepo.getByUsername(username);
         const ret = await userPokemonsRepo.freePokemons(user.id);
 
         res.json({

@@ -1,9 +1,6 @@
 import { promisify } from "util";
 import bcrypt from "bcrypt";
-
-export async function checkPassword(password, hash) {
-    return await bcrypt.compare(password, hash);
-}
+import { checkPassword } from "../repositories.js";
 
 const BASE_NB = 25;
 function nbValide(value) {
