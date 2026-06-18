@@ -211,6 +211,52 @@ router.patch("/", async (req, res) => {
 
 });
 
+router.post("/isLoged", async (req, res) => {
+    try {
+        let {
+            username,
+            identifiant
+        } = req.body;
+        if (!identifiant || !username) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Missing username or identifiant"
+            });
+
+        }
+
+        const user = await usersRepo.getByUsername(username);
+        const connected = await sessionRepo.chekToken(user.id, identifiant);
+        if (!connected) {
+
+            return res.status(401).json({
+                success: false,
+                message: "Mauvais identifiant ou Username"
+            });
+        }
+        else{
+            res.json({
+                success: true,
+                user,
+                identifiant
+            });
+        }
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+
+});
+
+
 router.post("/login", async (req, res) => {
 
     try {
