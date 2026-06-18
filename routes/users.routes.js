@@ -227,6 +227,13 @@ router.post("/isLoged", async (req, res) => {
         }
 
         const user = await usersRepo.getByUsername(username);
+        if (!user) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur inconnu"
+            });
+        }
         const connected = await sessionRepo.chekToken(user.id, identifiant);
         if (!connected) {
 
