@@ -113,6 +113,7 @@ export default class Users {
             `
             SELECT id, image, username, description, created_at
             FROM users
+            WHERE last_activity > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
             `
         );
 
@@ -125,5 +126,17 @@ export default class Users {
             return false;
         }
         return await checkPassword(identifiant, user.identifiant);
+    }
+
+    async refreshLastActivity(id) {
+        const result = await this.query(
+            `
+            UPDATE users
+            SET last_activity = NOW()
+            WHERE id = ?
+            `,
+            [id]
+        );
+        return result.affectedRows > 0;
     }
 }

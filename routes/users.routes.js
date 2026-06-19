@@ -175,6 +175,7 @@ router.patch("/", auth, async (req, res) => {
         }
 
         const updated = await usersRepo.update(req.user.id, image, username, description);
+        usersRepo.refreshLastActivity(req.user.id);
 
         res.json({
             success: true,
@@ -196,6 +197,7 @@ router.patch("/", auth, async (req, res) => {
 
 router.post("/isLoged", auth, async (req, res) => {
 
+    usersRepo.refreshLastActivity(req.user.id);
     res.json({
         success: true,
         user: req.user
@@ -207,7 +209,7 @@ router.post("/login", async (req, res) => {
 
     try {
 
-        let {
+        const {
             username,
             identifiant
         } = req.body;
@@ -231,6 +233,7 @@ router.post("/login", async (req, res) => {
 
         const user = await usersRepo.getByUsername(username);
         const token = await sessionRepo.refreshToken(user.id);
+        usersRepo.refreshLastActivity(user.id);
         res.json({
             success: true,
             user,

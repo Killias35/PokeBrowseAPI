@@ -2,9 +2,11 @@ import e from "express";
 import { encountersRepo, pokemonsRepo } from "../repositories.js";
 
 
-const SHINYCHANCE = 0.005;
+export const SHINYCHANCE = 0.005;
 export const EXPIRES_AT = 5 * 60 * 1000;  // 5 minutes
-export const MAX_SPAWNS = 5;
+export const MAX_SPAWNS = 10;
+export const MAX_TIME_BEFORE_SPAWN = 1 * 1000; // 1 minute
+
 
 async function loadSpawnConfig() {
     const table = await encountersRepo.getAll();

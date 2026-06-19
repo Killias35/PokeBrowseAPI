@@ -46,6 +46,19 @@ export default class SpawnPokemon {
         return ret;
     }
 
+    async getAllSpawned(user_id) {
+        const ret = await this.query(
+            `
+            SELECT *
+            FROM spawn_pokemon
+            WHERE user_id = ?
+            AND expires_at > NOW()
+            `,
+            [user_id]
+        );
+        return ret;
+    }
+
     async deleteTooOld() {
         await this.query(
             `

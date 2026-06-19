@@ -1,6 +1,6 @@
 import express from "express";
 
-import { spawnRepo, encountersUserRepo } from "../repositories.js";
+import { spawnRepo, encountersUserRepo, usersRepo } from "../repositories.js";
 import { MAX_SPAWNS } from "../repositories/SpawnUtils.js";
 import { auth } from "../middleware/auth.js";
 import UserEncouters from "../repositories/UserEncouters.js";
@@ -27,7 +27,7 @@ router.post("/spawned", auth, async (req, res) => {
         await encountersUserRepo.deleteTooOld();
         await spawnRepo.deleteTooOld();
 
-        const spawned = await spawnRepo.getSpawned(req.user.id, domainName);
+        const spawned = await spawnRepo.getAllSpawned(req.user.id);
         if(spawned.length < MAX_SPAWNS) {
             const canSpawn = await encountersUserRepo.get(req.user.id);
             for (const encounter of canSpawn) {
@@ -36,6 +36,7 @@ router.post("/spawned", auth, async (req, res) => {
             }
         }
 
+        usersRepo.refreshLastActivity(req.user.id);
         const ret = await spawnRepo.getSpawned(req.user.id, domainName);
 
         res.json({

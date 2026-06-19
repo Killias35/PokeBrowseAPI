@@ -22,7 +22,8 @@ CREATE TABLE users (
     identifiant VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-ALTER TABLE users ADD COLUMN domain_active VARCHAR(255) DEFAULT "";
+ALTER TABLE users ADD COLUMN domain_active VARCHAR(255) DEFAULT "", 
+ADD COLUMN last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 -- =========================
 -- SESSION
@@ -57,7 +58,7 @@ CREATE TABLE pokemon (
 );
 
 -- =========================
--- ENCOUNTERS
+-- ENCOUNTERS   (Table de rencontres possibles)
 -- =========================
 
 CREATE TABLE encounters(
