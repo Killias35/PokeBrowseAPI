@@ -1,5 +1,5 @@
 import { promisify } from "util";
-import { getPokemon } from "./SpawnUtils.js";
+import { getPokemon, EXPIRES_AT, MAX_SPAWNS } from "./SpawnUtils.js";
 
 export default class SpawnPokemon {
 
@@ -8,36 +8,50 @@ export default class SpawnPokemon {
         this.query = promisify(connection.query).bind(connection);
     }
 
-    async canSpawn(user_id, domain_active) {
-        const ret = await this.query(
-            `
-            SELECT *
-            FROM user_pokemon
-            WHERE user_id = ? AND domain_name = ?
-            `,
-            [user_id, domain_active]
-        );
-
-        return (
-            ret.length < 5
-        )
-    }
-
     async spawn(user_id, domain_active) {
         const pokemon = await getPokemon(domain_active);
+        const expires_at = new Date(Date.now() + EXPIRES_AT);
 
         await this.query(
             `
-            INSERT INTO user_pokemon
+            INSERT INTO spawn_pokemon
             (
                 user_id,
                 pokemon_id,
                 is_shiny,
-                domain_name
+                domain_name,
+                expires_at
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             `,
-            [user_id, pokemon.id, pokemon.is_shiny, domain_active]
+            [user_id, pokemon.id, pokemon.is_shiny, domain_active, expires_at]
+        );
+    }
+
+    async spawnAll(user_id, domain_active) {    // evenement potentiel
+        for (let i = 0; i < MAX_SPAWNS; i++) {
+            await this.spawn(user_id, domain_active);
+        }
+    }
+
+    async getSpawned(user_id, domain_active) {
+        const ret = await this.query(
+            `
+            SELECT *
+            FROM spawn_pokemon
+            WHERE user_id = ? AND domain_name = ?
+            `,
+            [user_id, domain_active]
+        );
+        return ret;
+    }
+
+    async deleteTooOld() {
+        await this.query(
+            `
+            DELETE FROM spawn_pokemon
+            WHERE expires_at < NOW()
+            `
         );
     }
 

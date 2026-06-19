@@ -94,6 +94,14 @@ CREATE TABLE user_pokemon (
     INDEX idx_domain (domain_name)
 );
 
+CREATE TABLE user_encouters (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    expires_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE spawn_pokemon (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,

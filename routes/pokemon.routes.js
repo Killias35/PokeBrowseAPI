@@ -7,6 +7,7 @@ import {
     sessionRepo
 }
 from "../repositories.js";
+import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -40,44 +41,24 @@ router.get("/", async (req, res) => {
 POST /pokemon/capture
 */
 
-router.post("/capture", async (req, res) => {
+router.post("/capture", auth, async (req, res) => {
 
     try {
 
         const {
-            username,
-            identifiant,
             pokemonId,
             isShiny,
             domainName
         } = req.body;
 
-        if (!username || !identifiant || !pokemonId) {
+        if (!pokemonId) {
 
             return res.status(400).json({
                 success: false,
                 message: "Missing fields"
             });
-
         }
 
-        const user = await usersRepo.getByUsername(username);
-        if (!user) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Utilisateur inconnu"
-            });
-        }
-
-        const connected = await sessionRepo.chekToken(user.id, identifiant);
-        if (!connected) {
-
-            return res.status(401).json({
-                success: false,
-                message: "Mauvais identifiant ou Username"
-            });
-        }
 
         const pokemon =
             await pokemonsRepo.getById(
@@ -95,7 +76,7 @@ router.post("/capture", async (req, res) => {
 
         const captureId =
             await userPokemonsRepo.capture(
-                user.id,
+                req.user.id,
                 pokemonId,
                 isShiny || false,
                 domainName || null

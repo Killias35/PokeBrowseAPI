@@ -1,8 +1,21 @@
-import { encountersRepo } from "../repositories.js";
+import e from "express";
+import { encountersRepo, pokemonsRepo } from "../repositories.js";
+
+
+const SHINYCHANCE = 0.5;
+export const EXPIRES_AT = 5 * 60 * 1000;  // 5 minutes
+export const MAX_SPAWNS = 5;
 
 async function loadSpawnConfig() {
-    const table = encountersRepo.getAll();
-    return table;
+    const table = await encountersRepo.getAll();
+    const ids = {};
+    for(const poke of table) {
+      if(!ids[poke.domain_name]) {
+        ids[poke.domain_name] = [];
+      }
+      ids[poke.domain_name].push(poke.pokemon_id);
+    }
+    return ids;
 }
 
 function domainToSeed(domain) {
@@ -24,59 +37,60 @@ function createRng(seed) {
   };
 }
 
-export async function getSpawnsForDomain(Pokemon, domain) {
-  const encoutersTable = await loadSpawnConfig();
-  const pokedex = Pokemon.getAll();
-  const seed = domainToSeed(domain);
-  const rng = createRng(seed);
+export async function getSpawnsForDomain(domain) {
+    const encoutersTable = await loadSpawnConfig();
+    const pokedex = await pokemonsRepo.getAll();
+    const seed = domainToSeed(domain);
+    const rng = createRng(seed);
 
-  // Nombre de spawns entre 10 et 20
-  const spawnCount = 10 + (seed % 11);
+    // Nombre de spawns entre 10 et 20
+    const spawnCount = 10 + (seed % 11);
 
-  // Pokémon garantis pour ce domaine
-  const guaranteed = encoutersTable[domain] ?? [];
+    // Pokémon garantis pour ce domaine
+    const guaranteed = encoutersTable[domain] ?? [];
 
-  // Tous les Pokémon garantis de tous les domaines
-  const excludedIds = new Set();
+    // Tous les Pokémon garantis de tous les domaines
+    const excludedIds = new Set();
 
-  for (const ids of Object.values(encoutersTable)) {
-    for (const id of ids) {
-      excludedIds.add(id);
+    for (const ids of Object.values(encoutersTable)) {
+      for (const id of ids) {
+        excludedIds.add(id);
+      }
     }
-  }
 
-  // Pool de base sans aucun Pokémon garanti
-  const basePool = [];
+    // Pool de base sans aucun Pokémon garanti
+    const basePool = [];
 
-  for (let i = 1; i <= pokedex.length; i++) {
-    if (!excludedIds.has(i)) {
-      basePool.push(i);
+    for (let i = 1; i <= pokedex.length; i++) {
+      if (!excludedIds.has(i)) {
+        basePool.push(i);
+      }
     }
-  }
 
-  // Shuffle Fisher-Yates déterministe
-  for (let i = basePool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [basePool[i], basePool[j]] = [basePool[j], basePool[i]];
-  }
+    // Shuffle Fisher-Yates déterministe
+    for (let i = basePool.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [basePool[i], basePool[j]] = [basePool[j], basePool[i]];
+    }
 
-  const needed = Math.max(0, spawnCount - guaranteed.length);
-  const picked = basePool.slice(0, needed);
+    const needed = Math.max(0, spawnCount - guaranteed.length);
+    const picked = basePool.slice(0, needed);
 
-  // Ajout des garantis du domaine
-  const ids = [...new Set([...guaranteed, ...picked])];
+    // Ajout des garantis du domaine
+    const ids = [...new Set([...guaranteed, ...picked])];
 
-  return ids.map(id => ({
-    ...pokedex[id - 1],
-    isGuaranteed: guaranteed.includes(id)
-  }));
+    return ids.map(id => ({
+      ...pokedex[id - 1],
+      isGuaranteed: guaranteed.includes(id)
+    }));
 }
 
 export async function getPokemon(domaine) {
-    const pool = await getSpawnsForDomain(domaine);
-    const pokemon = pool[Math.floor(Math.random() * pool.length)];
-    pokemon.isShiny = Math.random() < shinyChance ? true : false;
-    pokemon.domaine = domaine;
+  const pool = await getSpawnsForDomain(domaine);
+  const pokemon = pool[Math.floor(Math.random() * pool.length)];
+  pokemon.isShiny = Math.random() < SHINYCHANCE ? true : false;
+  pokemon.domaine = domaine;
+  return pokemon;
 }
 
-console.log(await loadSpawnConfig());
+// console.log(await getSpawnsForDomain("google.com"));

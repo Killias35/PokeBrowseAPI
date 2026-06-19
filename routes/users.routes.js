@@ -1,5 +1,6 @@
 import express from "express";
 import { usersRepo, sessionRepo, hashPassword } from "../repositories.js";
+import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -155,7 +156,7 @@ router.get("/search/:username", async (req, res) => {
 
 });
 
-router.patch("/", async (req, res) => {
+router.patch("/", auth, async (req, res) => {
 
     try {
 
@@ -163,7 +164,6 @@ router.patch("/", async (req, res) => {
             image,
             username,
             description,
-            identifiant
         } = req.body;
         
         if (!username && !description && !image) {
@@ -174,24 +174,7 @@ router.patch("/", async (req, res) => {
             });
         }
 
-        const user = await usersRepo.getByUsername(username);
-        if (!user) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Utilisateur inconnu"
-            });
-        }
-
-        const connected = await sessionRepo.chekToken(user.id, identifiant);
-        if (!connected) {
-
-            return res.status(401).json({
-                success: false,
-                message: "Mauvais identifiant ou Username"
-            });
-        }
-        const updated = await usersRepo.update(user.id, image, username, description);
+        const updated = await usersRepo.update(req.user.id, image, username, description);
 
         res.json({
             success: true,
@@ -211,56 +194,12 @@ router.patch("/", async (req, res) => {
 
 });
 
-router.post("/isLoged", async (req, res) => {
-    try {
-        let {
-            username,
-            identifiant
-        } = req.body;
-        if (!identifiant || !username) {
+router.post("/isLoged", auth, async (req, res) => {
 
-            return res.status(400).json({
-                success: false,
-                message: "Missing username or identifiant"
-            });
-
-        }
-
-        const user = await usersRepo.getByUsername(username);
-        if (!user) {
-
-            return res.status(404).json({
-                success: false,
-                message: "Utilisateur inconnu"
-            });
-        }
-        const connected = await sessionRepo.chekToken(user.id, identifiant);
-        if (!connected) {
-
-            return res.status(401).json({
-                success: false,
-                message: "Mauvais identifiant ou Username"
-            });
-        }
-        else{
-            res.json({
-                success: true,
-                user,
-                identifiant
-            });
-        }
-
-    }
-    catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({
-            success: false
-        });
-
-    }
-
+    res.json({
+        success: true,
+        user: req.user
+    }); 
 });
 
 

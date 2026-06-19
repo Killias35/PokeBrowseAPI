@@ -58,20 +58,21 @@ export default class Session {
         return result[0] || null;
     }
 
-    async chekToken(user_id, token) {
+    async chekToken(token) {
         const result = await this.query(
             `
             SELECT *
             FROM Session
-            WHERE token = ? AND user_id = ?
+            WHERE token = ?
             AND expires_at > NOW()
             LIMIT 1
             `,
-            [token, user_id]
+            [token]
         );
 
         const chekToken = result[0] || null;
-        if(chekToken) await this.refreshExpiresAt(user_id);
+        if(!chekToken) return false;
+        if(chekToken) await this.refreshExpiresAt(chekToken.user_id);
         return chekToken;
     }
 
