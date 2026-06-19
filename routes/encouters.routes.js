@@ -1,27 +1,22 @@
 import express from "express";
 
-import {
-    pokemonsRepo,
-    userPokemonsRepo,
-    usersRepo,
-    sessionRepo
-}
-from "../repositories.js";
+import { spawnRepo, encountersUserRepo } from "../repositories.js";
+import { MAX_SPAWNS } from "../repositories/SpawnUtils.js";
 import { auth } from "../middleware/auth.js";
+import UserEncouters from "../repositories/UserEncouters.js";
 
 const router = express.Router()
 
-router.post("/spawned", async (req, res) => {
-
+router.post("/spawned", auth, async (req, res) => {
+    // obtient combien de pokemons peuvent apparaitre et fais apparaitre ces pokemons si possible
+    // retourne ensuite tout les pokemons qui ont spawn
     try {
 
         const {
-            username,
-            identifiant,
             domainName
         } = req.body;
 
-        if (!username || !identifiant) {
+        if (!domainName) {
 
             return res.status(400).json({
                 success: false,
@@ -29,25 +24,19 @@ router.post("/spawned", async (req, res) => {
             });
         }
 
-        const user = await usersRepo.getByUsername(username);
-        if (!user) {
+        await encountersUserRepo.deleteTooOld();
+        await spawnRepo.deleteTooOld();
 
-            return res.status(404).json({
-                success: false,
-                message: "Utilisateur inconnu"
-            });
+        const spawned = await spawnRepo.getSpawned(req.user.id, domainName);
+        if(spawned.length < MAX_SPAWNS) {
+            const canSpawn = await encountersUserRepo.get(req.user.id);
+            for (const encounter of canSpawn) {
+                await spawnRepo.spawn(req.user.id, domainName, encounter.expires_at);
+                await encountersUserRepo.delete(encounter.id);
+            }
         }
 
-        const connected = await sessionRepo.chekToken(user.id, identifiant);
-        if (!connected) {
-
-            return res.status(401).json({
-                success: false,
-                message: "Mauvais identifiant ou Username"
-            });
-        }
-
-        const ret = await userPokemonsRepo.spawnedPokemons(user.id, domainName);
+        const ret = await spawnRepo.getSpawned(req.user.id, domainName);
 
         res.json({
             success: true,

@@ -8,6 +8,7 @@ import Settings from "./repositories/Settings.js";
 import Session from "./repositories/Session.js";
 import SpawnPokemon from "./repositories/SpawnPokemon.js";
 import Encouters from "./repositories/Encouters.js";
+import UserEncouters from "./repositories/UserEncouters.js";
 import bcrypt from "bcrypt";
 
 
@@ -33,3 +34,6 @@ export const settingsRepo = new Settings(connection);
 export const sessionRepo = new Session(connection);
 export const spawnRepo = new SpawnPokemon(connection);
 export const encountersRepo = new Encouters(connection);
+export const encountersUserRepo = new UserEncouters(connection);
+
+encountersUserRepo.create(2);

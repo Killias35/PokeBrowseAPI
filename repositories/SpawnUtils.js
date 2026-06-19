@@ -2,7 +2,7 @@ import e from "express";
 import { encountersRepo, pokemonsRepo } from "../repositories.js";
 
 
-const SHINYCHANCE = 0.5;
+const SHINYCHANCE = 0.005;
 export const EXPIRES_AT = 5 * 60 * 1000;  // 5 minutes
 export const MAX_SPAWNS = 5;
 
@@ -88,7 +88,7 @@ export async function getSpawnsForDomain(domain) {
 export async function getPokemon(domaine) {
   const pool = await getSpawnsForDomain(domaine);
   const pokemon = pool[Math.floor(Math.random() * pool.length)];
-  pokemon.isShiny = Math.random() < SHINYCHANCE ? true : false;
+  pokemon.is_shiny = Math.random() < SHINYCHANCE ? true : false;
   pokemon.domaine = domaine;
   return pokemon;
 }

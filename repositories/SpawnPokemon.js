@@ -8,9 +8,8 @@ export default class SpawnPokemon {
         this.query = promisify(connection.query).bind(connection);
     }
 
-    async spawn(user_id, domain_active) {
+    async spawn(user_id, domain_active, expires_at) {
         const pokemon = await getPokemon(domain_active);
-        const expires_at = new Date(Date.now() + EXPIRES_AT);
 
         await this.query(
             `
@@ -40,6 +39,7 @@ export default class SpawnPokemon {
             SELECT *
             FROM spawn_pokemon
             WHERE user_id = ? AND domain_name = ?
+            AND expires_at > NOW()
             `,
             [user_id, domain_active]
         );
