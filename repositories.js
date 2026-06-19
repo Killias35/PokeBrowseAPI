@@ -35,5 +35,3 @@ export const sessionRepo = new Session(connection);
 export const spawnRepo = new SpawnPokemon(connection);
 export const encountersRepo = new Encouters(connection);
 export const encountersUserRepo = new UserEncouters(connection);
-
-encountersUserRepo.create(2);
