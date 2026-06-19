@@ -22,6 +22,7 @@ CREATE TABLE users (
     identifiant VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE users ADD COLUMN domain_active VARCHAR(255) DEFAULT "";
 
 -- =========================
 -- SESSION
@@ -56,6 +57,18 @@ CREATE TABLE pokemon (
 );
 
 -- =========================
+-- ENCOUNTERS
+-- =========================
+
+CREATE TABLE encounters(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    pokemon_id INT NOT NULL,
+    domain_name VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon(id) ON DELETE CASCADE
+);
+
+-- =========================
 -- USER POKEMON (CAPTURES)
 -- =========================
 
@@ -79,6 +92,18 @@ CREATE TABLE user_pokemon (
     INDEX idx_pokemon (pokemon_id),
     INDEX idx_shiny (is_shiny),
     INDEX idx_domain (domain_name)
+);
+
+CREATE TABLE spawn_pokemon (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    pokemon_id INT NOT NULL,
+    is_shiny BOOLEAN DEFAULT FALSE,
+    domain_name VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon(id) ON DELETE CASCADE
 );
 
 -- =========================

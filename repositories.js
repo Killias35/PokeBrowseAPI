@@ -6,6 +6,8 @@ import UserPokemons from "./repositories/UserPokemons.js";
 import Leaderboards from "./repositories/Leaderboards.js";
 import Settings from "./repositories/Settings.js";
 import Session from "./repositories/Session.js";
+import SpawnPokemon from "./repositories/SpawnPokemon.js";
+import Encouters from "./repositories/Encouters.js";
 import bcrypt from "bcrypt";
 
 
@@ -29,3 +31,5 @@ export const userPokemonsRepo = new UserPokemons(connection);
 export const leaderboardsRepo = new Leaderboards(connection);
 export const settingsRepo = new Settings(connection);
 export const sessionRepo = new Session(connection);
+export const spawnRepo = new SpawnPokemon(connection);
+export const encountersRepo = new Encouters(connection);
