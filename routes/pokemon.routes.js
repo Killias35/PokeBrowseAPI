@@ -4,7 +4,9 @@ import {
     pokemonsRepo,
     userPokemonsRepo,
     usersRepo,
-    sessionRepo
+    sessionRepo,
+    spawnRepo,
+    encountersUserRepo
 }
 from "../repositories.js";
 import { auth } from "../middleware/auth.js";
@@ -178,6 +180,46 @@ router.get("/:id", async (req, res) => {
 
 });
 
+
+router.post("/start", auth, async (req, res) => {
+    // obtient combien de pokemons peuvent apparaitre et fais apparaitre ces pokemons si possible
+    // retourne ensuite tout les pokemons qui ont spawn
+    try {
+
+        const {
+            encounter_id
+        } = req.body;
+        if (!encounter_id) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Missing fields"
+            });
+        }
+
+        await encountersUserRepo.deleteTooOld();
+        await spawnRepo.deleteTooOld();
+
+        await spawnRepo.refreshExpiresAt(encounter_id);
+
+        usersRepo.refreshLastActivity(req.user.id);
+
+        res.json({
+            success: true
+        });
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            success: false
+        });
+
+    }
+
+});
 
 router.delete("/free/", async (req, res) => {
 

@@ -4,6 +4,7 @@ import { spawnRepo, encountersUserRepo, usersRepo } from "../repositories.js";
 import { MAX_SPAWNS } from "../repositories/SpawnUtils.js";
 import { auth } from "../middleware/auth.js";
 import UserEncouters from "../repositories/UserEncouters.js";
+import e from "express";
 
 const router = express.Router()
 
@@ -56,5 +57,6 @@ router.post("/spawned", auth, async (req, res) => {
     }
 
 });
+
 
 export default router

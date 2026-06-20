@@ -33,6 +33,18 @@ export default class SpawnPokemon {
         }
     }
 
+    async refreshExpiresAt(id) {
+        const expires_at = new Date(Date.now() + 1000 * 60 * 5);
+        await this.query(
+            `
+            UPDATE spawn_pokemon
+            SET expires_at = ?
+            WHERE id = ?
+            `,
+            [expires_at, id]
+        );
+    }
+
     async getSpawned(user_id, domain_active) {
         const ret = await this.query(
             `
