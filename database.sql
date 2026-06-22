@@ -57,6 +57,26 @@ CREATE TABLE pokemon (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE pokeballs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    sprite VARCHAR(255),
+    ball_power INT,
+    max_stock INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE pokeball_users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    pokeball_id INT NOT NULL,
+    quantity INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (pokeball_id) REFERENCES pokeballs(id) ON DELETE CASCADE
+)
+
 -- =========================
 -- ENCOUNTERS   (Table de rencontres possibles)
 -- =========================
@@ -113,6 +133,15 @@ CREATE TABLE spawn_pokemon (
     expires_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (pokemon_id) REFERENCES pokemon(id) ON DELETE CASCADE
+);
+
+CREATE TABLE battle_user (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    pokemon_id INT NOT NULL,
+    started BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- =========================
