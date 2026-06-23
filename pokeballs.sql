@@ -1,0 +1,30 @@
+INSERT INTO pokeballs
+(
+    name,
+    sprite,
+    ball_power,
+    max_stock,
+    cooldown
+)
+VALUES
+(
+    'pokeball',
+    NULL,
+    1,
+    15,
+    0.1667
+),
+(
+    'superball',
+    NULL,
+    1.25,
+    5,
+    0.5
+),
+(
+    'hyperball',
+    NULL,
+    1.5,
+    3,
+    12
+);

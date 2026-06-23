@@ -63,6 +63,7 @@ CREATE TABLE pokeballs (
     sprite VARCHAR(255),
     ball_power INT,
     max_stock INT,
+    cooldown DECIMAL(5,4),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -75,7 +76,7 @@ CREATE TABLE pokeball_users (
     last_used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (pokeball_id) REFERENCES pokeballs(id) ON DELETE CASCADE
-)
+);
 
 -- =========================
 -- ENCOUNTERS   (Table de rencontres possibles)
