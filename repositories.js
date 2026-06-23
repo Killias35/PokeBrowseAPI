@@ -9,6 +9,10 @@ import Session from "./repositories/Session.js";
 import SpawnPokemon from "./repositories/SpawnPokemon.js";
 import Encouters from "./repositories/Encouters.js";
 import UserEncouters from "./repositories/UserEncouters.js";
+import PokeballUsers from "./repositories/PokeballUsers.js";
+import Pokeballs from "./repositories/Pokeballs.js";
+
+import crypto from "crypto";
 import bcrypt from "bcrypt";
 
 
@@ -35,3 +39,5 @@ export const sessionRepo = new Session(connection);
 export const spawnRepo = new SpawnPokemon(connection);
 export const encountersRepo = new Encouters(connection);
 export const encountersUserRepo = new UserEncouters(connection);
+export const pokeballUsersRepo = new PokeballUsers(connection);
+export const pokeballsRepo = new Pokeballs(connection);
