@@ -48,7 +48,7 @@ router.post("/show", auth, async (req, res) => {
     try {
 
         const pokeballs =
-            await pokeballUsersRepo.getUserId(
+            await pokeballUsersRepo.show(
                 req.user.id
             );
 

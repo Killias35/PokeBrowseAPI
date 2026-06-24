@@ -114,6 +114,89 @@ export default class PokeballUsers {
         return result;
     }
 
+    async show(user_id) {
+        await this.setStockPokeball(user_id);
+        const pokeballs = await this.query(
+            `
+            SELECT
+                pu.id,
+                pu.user_id,
+                pu.pokeball_id,
+                pu.quantity,
+                UNIX_TIMESTAMP(pu.last_used_at) * 1000 AS last_used_at,
+
+                p.name,
+                p.sprite,
+                p.ball_power,
+                p.max_stock,
+                p.cooldown
+
+            FROM pokeball_users pu
+
+            INNER JOIN pokeballs p
+                ON p.id = pu.pokeball_id
+
+            WHERE pu.user_id = ?
+            `,
+            [user_id]
+        );
+
+        const now = Date.now();
+
+        return pokeballs.map(pokeball => {
+
+            let remainingTime = "---";
+
+            if (pokeball.quantity < pokeball.max_stock) {
+
+                const elapsed =
+                    now - pokeball.last_used_at;
+
+                const cooldown =
+                    pokeball.cooldown * 60 * 60 * 1000;
+
+                const remaining =
+                    Math.max(0, cooldown - elapsed);
+
+                const heures =
+                    remaining / (60 * 60 * 1000);
+
+                if (heures >= 1) {
+
+                    remainingTime =
+                        `${heures.toFixed(2)} heures restantes`;
+
+                }
+                else {
+
+                    const minutes =
+                        remaining / (60 * 1000);
+
+                    if (minutes >= 1) {
+
+                        remainingTime =
+                            `${minutes.toFixed(2)} minutes restantes`;
+
+                    }
+                    else {
+
+                        const secondes =
+                            remaining / 1000;
+
+                        remainingTime =
+                            `${secondes.toFixed(2)} secondes restantes`;
+
+                    }
+                }
+            }
+
+            return {
+                ...pokeball,
+                remaining_time: remainingTime
+            };
+        });
+}
+
     async create(user_id, pokeball_id, quantity = 0) {
         const result = await this.query(
             `
