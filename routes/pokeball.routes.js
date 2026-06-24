@@ -93,10 +93,10 @@ router.post("/use", auth, async (req, res) => {
 
         }
 
-        await pokeballUsersRepo.use(req.user.id, pokeball.id);
+        const used = await pokeballUsersRepo.use(req.user.id, pokeball_id);
 
         res.json({
-            success: true
+            success: used
         });
 
     }

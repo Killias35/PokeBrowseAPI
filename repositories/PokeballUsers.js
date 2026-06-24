@@ -1,4 +1,5 @@
 import { promisify } from "util";
+import { pokeballsRepo } from "../repositories.js";
 
 export default class PokeballUsers {
 
@@ -7,60 +8,82 @@ export default class PokeballUsers {
         this.query = promisify(connection.query).bind(connection);
     }
 
-    async setStockPokeball() {
+    async addForUserIfNotExist(user_id) {
+        const pokeballs = await pokeballsRepo.getAll();
+        const pokeballsIds = pokeballs.map(p => p.id);
+
+        const pokeballsUser = await this.getUserId(user_id, false);
+        const pokeballsUserIds = pokeballsUser.map(pu => pu.pokeball_id);
+
+        for (const id of pokeballsIds) {
+            if (!pokeballsUserIds.includes(id)) {
+                await this.create(user_id, id);
+            }
+        }
+    }
+
+    async setStockPokeball(user_id) {
+
+        await this.addForUserIfNotExist(user_id);
 
         const pokeballs = await this.query(
             `
-            SELECT pu.id, UNIX_TIMESTAMP(pu.last_used_at) * 1000 AS last_used_at,
+            SELECT pu.id,
+                pu.quantity,
+                UNIX_TIMESTAMP(pu.last_used_at) * 1000 AS last_used_at,
+                p.max_stock,
+                p.cooldown
             FROM pokeball_users pu
             INNER JOIN pokeballs p
                 ON p.id = pu.pokeball_id
-            `
+            WHERE pu.user_id = ?
+            `,
+            [user_id]
         );
 
         const now = Date.now();
 
         for (const pokeball of pokeballs) {
 
-            if (pokeball.quantity >= pokeball.max_stock) {
-                continue;
-            }
+            const cooldownMs = pokeball.cooldown * 60 * 60 * 1000;
 
             const elapsed = now - pokeball.last_used_at;
-            const cooldown = pokeball.cooldown * 60 * 60 * 1000;
 
-            const maxGenerated = pokeball.max_stock - pokeball.quantity;
+            const generated = Math.floor(elapsed / cooldownMs);
 
-            const generated = Math.min(
-                maxGenerated,
-                Math.floor(elapsed / cooldown)
-            );
-
-            if (generated >= 1) {
+            if (generated > 0) {
 
                 pokeball.quantity += generated;
-                pokeball.last_used_at += generated * cooldown;
-
-                await this.query(
-                    `
-                    UPDATE pokeball_users
-                    SET quantity = ?,
-                        last_used_at = FROM_UNIXTIME(? / 1000)
-                    WHERE id = ?
-                    `,
-                    [
-                        pokeball.quantity,
-                        pokeball.last_used_at,
-                        pokeball.id
-                    ]
-                );
+                pokeball.last_used_at += generated * cooldownMs;
             }
+
+            if (pokeball.quantity > pokeball.max_stock) {
+                pokeball.quantity = pokeball.max_stock;
+            }
+
+            if (pokeball.quantity < 0) {
+                pokeball.quantity = 0;
+            }
+
+            await this.query(
+                `
+                UPDATE pokeball_users
+                SET quantity = ?,
+                    last_used_at = FROM_UNIXTIME(? / 1000)
+                WHERE id = ?
+                `,
+                [
+                    pokeball.quantity,
+                    pokeball.last_used_at,
+                    pokeball.id
+                ]
+            );
         }
     }
 
-    async get(id) {
+    async get(id, user_id) {
 
-        await this.setStockPokeball();
+        await this.setStockPokeball(user_id);
 
         const result = await this.query(
             `
@@ -75,10 +98,10 @@ export default class PokeballUsers {
         return result[0] || null;
     }
 
-    async getUserId(user_id) {
-
-        await this.setStockPokeball();
-
+    async getUserId(user_id, setStock = true) {
+        if(setStock){
+            await this.setStockPokeball(user_id);
+        }
         const result = await this.query(
             `
             SELECT *
@@ -92,9 +115,6 @@ export default class PokeballUsers {
     }
 
     async create(user_id, pokeball_id, quantity = 0) {
-
-        await this.setStockPokeball();
-
         const result = await this.query(
             `
             INSERT INTO pokeball_users
@@ -115,23 +135,24 @@ export default class PokeballUsers {
         return result.insertId;
     }
 
-    async use(user_id, pokeball_id, quantity=1) {
+    async use(user_id, pokeball_id, quantity = 1) {
+        await this.setStockPokeball(user_id);
 
         const result = await this.query(
             `
             UPDATE pokeball_users
-            SET quantity = quantity - ?,
-                last_used_at = CURRENT_TIMESTAMP
+            SET quantity = quantity - ?
             WHERE user_id = ?
             AND pokeball_id = ?
+            AND quantity >= ?
             `,
             [
                 quantity,
                 user_id,
-                pokeball_id
+                pokeball_id,
+                quantity
             ]
         );
-
         return result.affectedRows > 0;
     }
 
