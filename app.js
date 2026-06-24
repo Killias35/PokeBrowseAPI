@@ -7,6 +7,7 @@ import userRoutes from "./routes/users.routes.js";
 import pokemonRoutes from "./routes/pokemon.routes.js";
 import leaderboardRoutes from "./routes/leaderboard.routes.js";
 import encoutersRoutes from "./routes/encouters.routes.js";
+import pokeballRoutes from "./routes/pokeball.routes.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/pokemon", pokemonRoutes);
 app.use("/encouters", encoutersRoutes);
+app.use("/pokeballs", pokeballRoutes);
 app.use("/", leaderboardRoutes);
 
 app.get("/status", (req, res) => {

@@ -7,6 +7,18 @@ export default class Pokeballs {
         this.query = promisify(connection.query).bind(connection);
     }
 
+    async getAll() {
+
+        const result = await this.query(
+            `
+            SELECT *
+            FROM pokeballs
+            `
+        );
+
+        return result;
+    }
+
     async get(id) {
 
         const result = await this.query(

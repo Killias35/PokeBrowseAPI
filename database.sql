@@ -61,9 +61,9 @@ CREATE TABLE pokeballs (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     sprite VARCHAR(255),
-    ball_power INT,
+    ball_power float,
     max_stock INT,
-    cooldown DECIMAL(5,4),
+    cooldown float,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
